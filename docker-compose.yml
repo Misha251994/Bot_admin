@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  # Web service for your Django application
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - app-data:/app/data
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  # PostgreSQL database service
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # Service for running migrations
+  migrate:
+    build: .
+    command: python manage.py migrate
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+networks:
+  mynetwork:
+    # Define a custom bridge network for the services
+
+volumes:
+  app-data:
+    # Named volume for persisting data related to the web service
+  db-data:
+    # Named volume for persisting PostgreSQL data
